@@ -1,13 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { listFiles, downloadFile } from "./api/s3Api";
+import {
+  Container,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  CircularProgress,
+  Paper,
+} from "@mui/material";
 
 function App() {
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     listFiles()
-      .then(data => setFiles(data.files))
-      .catch(console.error);
+      .then((data) => {
+        setFiles(data.files);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
 
   const handleDownload = async (fileName) => {
@@ -25,17 +42,43 @@ function App() {
     }
   };
 
+  if (loading) {
+    return (
+      <Container sx={{ textAlign: "center", mt: 5 }}>
+        <CircularProgress />
+        <Typography variant="h6" mt={2}>
+          Загружаем файлы...
+        </Typography>
+      </Container>
+    );
+  }
+
   return (
-    <div>
-      <h1>Список файлов</h1>
-      <ul>
-        {files.map((f) => (
-          <li key={f}>
-            {f} <button onClick={() => handleDownload(f)}>Скачать</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Container sx={{ mt: 5 }}>
+      <Typography variant="h4" gutterBottom>
+        Список файлов
+      </Typography>
+      <Paper sx={{ p: 2 }}>
+        <List>
+          {files.map((f) => (
+            <ListItem
+              key={f}
+              secondaryAction={
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleDownload(f)}
+                >
+                  Скачать
+                </Button>
+              }
+            >
+              <ListItemText primary={f} />
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
+    </Container>
   );
 }
 
