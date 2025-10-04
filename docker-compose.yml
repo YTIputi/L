@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio_test
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+  mc:
+    image: minio/mc:latest
+    container_name: minio-mc_test
+    depends_on:
+      - minio
+    entrypoint: ["sh", "-c", "while true; do sleep 3600; done"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
