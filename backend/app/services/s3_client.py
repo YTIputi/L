@@ -3,7 +3,7 @@ from botocore.client import Config
 import os
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path='/Users/glebovcharov/Desktop/S3_test/env/pyvenv.cfg')
+load_dotenv(dotenv_path='/Users/glebovcharov/Desktop/L/backend/env/pyvenv.cfg')
 
 class S3Client:
     def __init__(self, bucket_name=None):
