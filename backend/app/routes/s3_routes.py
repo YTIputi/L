@@ -6,6 +6,8 @@ import os
 router = APIRouter()
 s3_client = S3Client()
 
+user_books = []
+
 @router.post("/upload/")
 async def upload(file: UploadFile = File(...)):
     try:
@@ -36,3 +38,22 @@ def list_files():
         return {"Bucket": s3_client.bucket_name, "files": files}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@router.get("/add_book/{file_name}")
+async def add_book_get(file_name: str = Path(..., path=True)):
+    try:
+        s3_client.s3.head_object(Bucket=s3_client.bucket_name, Key=file_name)
+    except Exception:
+        raise HTTPException(status_code=404, detail=f"Book '{file_name}' not found in bucket")
+
+    if file_name not in user_books:
+        user_books.append(file_name)
+        return {"message": f"Book '{file_name}' added to user_books"}
+    return {"message": f"Book '{file_name}' is already in user_books"}
+
+
+@router.get("/user_books")
+async def get_user_books():
+    return {"user_books": user_books}
+
