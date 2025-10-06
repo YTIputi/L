@@ -52,6 +52,17 @@ async def add_book_get(file_name: str = Path(..., path=True)):
         return {"message": f"Book '{file_name}' added to user_books"}
     return {"message": f"Book '{file_name}' is already in user_books"}
 
+@router.delete("/del_book/{file_name}")
+async def del_book(file_name: str = Path(..., path=True)):
+    try:
+        s3_client.s3.head_object(Bucket=s3_client.bucket_name, Key=file_name)
+    except Exception:
+        raise HTTPException(status_code=404, detail=f"Book '{file_name}' not found in bucket")
+
+    if file_name in user_books:
+        user_books.remove(file_name)
+        return {"message": f"Book '{file_name}' removed from user_books"}
+    return {"message": f"Book '{file_name}' is not in user_books"}
 
 @router.get("/user_books")
 async def get_user_books():
