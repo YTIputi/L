@@ -11,7 +11,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
-      - ./data:/data
+      - /Users/glebovcharov/Desktop/L/data:/data
     command: server /data --console-address ":9001"
     restart: unless-stopped
 
