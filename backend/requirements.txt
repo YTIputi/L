@@ -4,3 +4,8 @@ boto3
 botocore
 python-multipart
 dotenv
+ebooklib
+bs4
+langchain
+qdrant-client
+sentence-transformers
