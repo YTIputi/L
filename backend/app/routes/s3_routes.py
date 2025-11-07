@@ -1,6 +1,6 @@
 from fastapi import APIRouter, FastAPI, UploadFile, File, HTTPException, Path
 from fastapi.responses import FileResponse
-from backend.app.services.s3_client import S3Client
+from services.s3_client import S3Client
 import os
 import typing
 

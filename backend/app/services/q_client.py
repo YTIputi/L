@@ -5,7 +5,6 @@ from pathlib import Path
 from sentence_transformers import SentenceTransformer
 from core import config
 import uuid
-import io.qdrant.client.grpc.Points.ScoredPoint;
 
 class QdrantConnector:
     def __init__(self, collection_name: str, url: str = "http://localhost:6333", embedding_model_name: str = 'all-MiniLM-L6-v2'):

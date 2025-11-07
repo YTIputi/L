@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import s3_routes
+from routes import s3_routes
 
 app = FastAPI(title="S3 FastAPI Demo")
 
