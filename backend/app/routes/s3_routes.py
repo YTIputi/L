@@ -2,6 +2,7 @@ from fastapi import APIRouter, FastAPI, UploadFile, File, HTTPException, Path
 from fastapi.responses import FileResponse
 from backend.app.services.s3_client import S3Client
 import os
+import typing
 
 router = APIRouter()
 s3_client = S3Client()
@@ -9,7 +10,7 @@ s3_client = S3Client()
 user_books = []
 
 @router.post("/upload/")
-async def upload(file: UploadFile = File(...)):
+async def upload(file: UploadFile = File(...)) -> dict:
     try:
         temp_path = os.path.join("/tmp", file.filename)
         with open(temp_path, "wb") as f:

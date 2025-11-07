@@ -5,14 +5,16 @@ import os
 from pathlib import Path
 from typing import Optional
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
+import numpy as np
 
 
-def emb(text: str):
-    model = SentenceTransformer("google/embeddinggemma-300m")
-    embedding = model.encode_query(text)
+
+def embedding_model(text: str, name: str = 'all-MiniLM-L6-v2') -> config.Vector:
+    p = Path('models') / name
+    print(p)
+    model = SentenceTransformer(str(p))
+    embedding = model.encode(text)
     return embedding
-
 
 def chunk(path: Path) -> None:
     if not path.exists():
@@ -26,10 +28,7 @@ def chunk(path: Path) -> None:
     chunks = text_splitter.split_text(text)
     connector = QdrantConnector(config.name_collention)
     for chunk in chunks:
-        chunk_embedding = emb(chunk)
-        print(chunk_embedding)
-        print(type(chunk_embedding))
-        break
+        chunk_embedding = embedding_model([chunk])
         # connector.add_vector(chunk_embedding, metadata={'name': name})
 
 
