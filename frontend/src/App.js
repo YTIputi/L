@@ -12,6 +12,7 @@ import {
   Tab,
   Box,
   Tooltip,
+  TextField,
 } from "@mui/material";
 import {
   listFiles,
@@ -20,12 +21,18 @@ import {
   delBook,
   getUserBooks,
 } from "./api/s3Api";
+import { search } from "./api/searchApi"; // ✅ импорт функции поиска
 
 function App() {
   const [files, setFiles] = useState([]);
   const [userBooks, setUserBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
+
+  // 🔍 для поиска
+  const [query, setQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     Promise.all([listFiles(), getUserBooks()])
@@ -77,6 +84,30 @@ function App() {
     }
   };
 
+  // 🔍 Поиск
+  const handleSearch = async () => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    try {
+      setSearching(true);
+      const results = await search(query);
+      setSearchResults(results);
+    } catch (e) {
+      console.error(e);
+      alert("Ошибка при поиске");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  // очистка поиска при смене вкладки
+  useEffect(() => {
+    setSearchResults([]);
+    setQuery("");
+  }, [tab]);
+
   if (loading) {
     return (
       <Container sx={{ textAlign: "center", mt: 5 }}>
@@ -88,13 +119,43 @@ function App() {
     );
   }
 
-  const displayedFiles = tab === 0 ? files : userBooks;
+  // если есть результаты поиска — показываем только их
+  const displayedFiles =
+    searchResults.length > 0
+      ? searchResults.map(
+          (r) => r.file_name || r.title || r.name || JSON.stringify(r)
+        )
+      : tab === 0
+      ? files
+      : userBooks;
 
   return (
     <Container sx={{ mt: 5 }}>
       <Typography variant="h4" gutterBottom>
         {tab === 0 ? "Все книги" : "Мои книги"}
       </Typography>
+
+      {/* 🔍 Поле поиска */}
+      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+        <TextField
+          label="Поиск"
+          variant="outlined"
+          fullWidth
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch();
+          }}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSearch}
+          disabled={searching}
+        >
+          {searching ? "Ищем..." : "Поиск"}
+        </Button>
+      </Box>
 
       <Box sx={{ mb: 3 }}>
         <Tabs value={tab} onChange={(_, newValue) => setTab(newValue)} centered>
@@ -104,64 +165,74 @@ function App() {
       </Box>
 
       <Paper sx={{ p: 2 }}>
-        <List>
-          {displayedFiles.map((f) => {
-            const alreadyAdded = userBooks.includes(f);
-            return (
-              <ListItem
-                key={f}
-                secondaryAction={
-                  <>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => handleDownload(f)}
-                      sx={{ mr: 1 }}
-                    >
-                      Скачать
-                    </Button>
-
-                    {tab === 0 ? (
-                      <Tooltip
-                        title={
-                          alreadyAdded ? "Уже добавлена" : "Добавить в мои книги"
-                        }
+        {displayedFiles.length === 0 ? (
+          <Typography variant="body1" align="center" color="text.secondary">
+            {searchResults.length > 0
+              ? "Ничего не найдено"
+              : "Файлы отсутствуют"}
+          </Typography>
+        ) : (
+          <List>
+            {displayedFiles.map((f) => {
+              const alreadyAdded = userBooks.includes(f);
+              return (
+                <ListItem
+                  key={f}
+                  secondaryAction={
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => handleDownload(f)}
+                        sx={{ mr: 1 }}
                       >
-                        <span>
+                        Скачать
+                      </Button>
+
+                      {tab === 0 ? (
+                        <Tooltip
+                          title={
+                            alreadyAdded
+                              ? "Уже добавлена"
+                              : "Добавить в мои книги"
+                          }
+                        >
+                          <span>
+                            <Button
+                              variant="outlined"
+                              color={alreadyAdded ? "inherit" : "success"}
+                              disabled={alreadyAdded}
+                              onClick={() => handleAdd(f)}
+                            >
+                              ➕
+                            </Button>
+                          </span>
+                        </Tooltip>
+                      ) : (
+                        <Tooltip title="Удалить из моих книг">
                           <Button
                             variant="outlined"
-                            color={alreadyAdded ? "inherit" : "success"}
-                            disabled={alreadyAdded}
-                            onClick={() => handleAdd(f)}
+                            color="error"
+                            onClick={() => handleRemove(f)}
                           >
-                            ➕
+                            ➖
                           </Button>
-                        </span>
-                      </Tooltip>
-                    ) : (
-                      <Tooltip title="Удалить из моих книг">
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          onClick={() => handleRemove(f)}
-                        >
-                          ➖
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </>
-                }
-              >
-                <ListItemText
-                  primary={f}
-                  sx={{
-                    color: alreadyAdded && tab === 0 ? "gray" : "inherit",
-                  }}
-                />
-              </ListItem>
-            );
-          })}
-        </List>
+                        </Tooltip>
+                      )}
+                    </>
+                  }
+                >
+                  <ListItemText
+                    primary={f}
+                    sx={{
+                      color: alreadyAdded && tab === 0 ? "gray" : "inherit",
+                    }}
+                  />
+                </ListItem>
+              );
+            })}
+          </List>
+        )}
       </Paper>
     </Container>
   );

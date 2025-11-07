@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import s3_routes
+from routes import s3_routes, search
 
 app = FastAPI(title="S3 FastAPI Demo")
 
@@ -17,3 +17,4 @@ def root():
     return {"message": "Backend is running"}
 
 app.include_router(s3_routes.router)
+app.include_router(search.router)

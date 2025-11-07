@@ -1,6 +1,5 @@
 from fastapi import APIRouter, FastAPI, UploadFile, File, HTTPException, Path
 from fastapi.responses import FileResponse
-from services.s3_client import S3Client
 import os
 import typing
 from services.q_client import QdrantConnector
