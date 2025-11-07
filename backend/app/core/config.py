@@ -1,0 +1,1 @@
+name_collention: str = "book_chunks"

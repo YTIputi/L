@@ -1,6 +1,7 @@
 from ebooklib import epub
 from bs4 import BeautifulSoup
 import re
+from pathlib import Path
 
 def clean_gutenberg_text(text: str) -> str:
     """
@@ -12,10 +13,7 @@ def clean_gutenberg_text(text: str) -> str:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     return "\n".join(lines)
 
-def extract_text_from_epub(file_path: str) -> str:
-    """
-    Извлекает текст из EPUB и убирает служебные вставки вроде Project Gutenberg.
-    """
+def extract_text_from_epub(file_path: Path) -> str:
     book = epub.read_epub(file_path)
     text = []
 
@@ -45,6 +43,6 @@ def extract_text_from_epub(file_path: str) -> str:
 
 
 if __name__ == "__main__":
-    epub_path = "/Users/glebovcharov/Desktop/Librartory/src/library/book/100_The Complete Works of William Shakespeare.epub"
+    epub_path = Path("/Users/glebovcharov/Desktop/Librartory/src/library/book/100_The Complete Works of William Shakespeare.epub")
     extracted_text = extract_text_from_epub(epub_path)
     print(extracted_text[5000:7000])

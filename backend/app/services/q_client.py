@@ -1,6 +1,6 @@
-from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance
 from typing import Optional
+from qdrant_client import QdrantClient
 
 class QdrantConnector:
     """
@@ -30,6 +30,9 @@ class QdrantConnector:
     def collection_exists(self, name: str) -> bool:
         collections = self.client.get_collections().collections
         return any(c.name == name for c in collections)
+    
+    def add_vector(self, vec, metadata={}):
+        pass
 
 if __name__ == "__main__":
     connector = QdrantConnector()
